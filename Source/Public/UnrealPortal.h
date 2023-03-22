@@ -32,11 +32,10 @@ class UNREALPORTALS_API AUnrealPortal : public AActor
 
     public:
 
+
         FPlane GetPortalPlane() const { return FPlane(GetActorLocation(), GetActorForwardVector()); }
 
         virtual void Tick(float DeltaTime) override;
-
-        
 
         UFUNCTION(BlueprintPure, Category="Portal")
         bool IsActive();
@@ -71,10 +70,13 @@ class UNREALPORTALS_API AUnrealPortal : public AActor
         UFUNCTION(BlueprintCallable, Category="Portal")
         void TeleportActor( AActor* ActorToTeleport );
 
+        UFUNCTION(BlueprintCallable, Category="Portal")
         void LoadMeshVertices() const;
 
+        UFUNCTION(BlueprintCallable, Category="Portal")
         const TArray<FVector>* GetMeshVertices() const;
 
+        UFUNCTION(BlueprintPure, Category="Portal")
         FVector GetMiddlePoint() const { return m_middle_point; }
 
     protected:
@@ -83,8 +85,10 @@ class UNREALPORTALS_API AUnrealPortal : public AActor
 
         virtual void BeginPlay() override;
 
+        UPROPERTY(BlueprintReadWrite)
         mutable TArray<FVector> m_vertices;
 
+        UPROPERTY(BlueprintReadWrite)
         mutable FVector m_middle_point;
 
     private:
@@ -95,6 +99,8 @@ class UNREALPORTALS_API AUnrealPortal : public AActor
         //Used for Tracking movement of a point
         FVector LastPosition;
         bool    LastInFront;
+
+        
 
     public:
 

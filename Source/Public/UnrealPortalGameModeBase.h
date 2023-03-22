@@ -2,11 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "UnrealPortalGameModeBase.generated.h"
+#include "UnrealPortalGameMode.generated.h"
 
 
 UCLASS()
-class UNREALPORTALS_API AUnrealPortalGameModeBase : public AGameModeBase
+class UNREALPORTALS_API AUnrealPortalGameMode : public AGameModeBase
 {
     GENERATED_BODY()
 };

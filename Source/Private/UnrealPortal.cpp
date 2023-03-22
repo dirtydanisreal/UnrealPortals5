@@ -38,6 +38,79 @@ AUnrealPortal::AUnrealPortal(const FObjectInitializer& ObjectInitializer)
     PortalArea->SetupAttatchment(PortalRootComponent);
 }
 
+FTextureToRender::FTextureToRender(FTextureToRender&& other) noexcept
+{
+   texture = other.texture;
+   is_mirror = other.is_mirror;
+   weight = other.weight;
+
+   other.texture = nullptr;
+   other.is_mirror = false;
+   other.weight = 0.f;
+}
+
+FTextureToRender::FTextureToRender(const FTextureToRender& other) noexcept
+{
+   texture = other.texture;
+   is_mirror = other.is_mirror;
+   weight = other.weight;
+}
+
+FTextureToRender& FTextureToRender::operator=(FTextureToRender&& other) noexcept
+{
+   if (this != &other)
+   {
+      delete texture;
+
+      texture = other.texture;
+      is_mirror = other.is_mirror;
+      weight = other.weight;
+
+      other.texture = nullptr;
+      other.is_mirror = false;
+      other.weight = 0.f;
+   }
+
+   return *this;
+}
+
+FTextureToRender& FTextureToRender::operator=(const FTextureToRender& other) noexcept
+{
+   if (this != &other)
+   {
+      delete texture;
+
+      texture = other.texture;
+      is_mirror = other.is_mirror;
+      weight = other.weight;
+   }
+
+   return *this;
+}
+
+void AUnrealPortal::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    if (OtherActor->IsA(AUnrealPortalCharacter::StaticClass()))
+	{
+		Overlapping = true;
+		if (PortalMesh != nullptr)
+		{
+			PortalMesh->SetActorEnableCollision(false);
+		}
+	}
+}
+
+void AUnrealPortal::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+
+    if (OtherActor->IsA(AUnrealPortalCharacter::StaticClass()))
+	{
+		Overlapping = false;
+		if (PortalMesh != nullptr)
+		{
+			PortalMesh->SetActorEnableCollision(true);
+		}
+}
+
 bool AUnrealPortal::IsActive()
 {
     return bIsActive;

@@ -3,7 +3,7 @@
 #include "UnrealPortalPlayerController.h"
 #include "UObject/ConstructorHelpers.h"
 
-AUnrealPortalGameModeBase::AUnrealPortalGameModeBase()
+AUnrealPortalGameMode::AUnrealPortalGameMode()
 	: Super()
 {
     PlayerControllerClass = AUnrealPortalPlayerController.StaticClass();
