@@ -3,6 +3,12 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "UnrealPortalPlayerController.h"
+#include "UnrealPortalManager.h"
+#include <Math/UnrealMathUtility.h> 
+#include <Editor/DetailCustomizations/Private/SceneCaptureDetails.h>
+#include <Kismet/GameplayStatics.h>
+#include <Kismet/KismetMathLibrary.h> 
+#include <Camera/CameraComponent.h>
 
 bool UTool::IsPointInsideBox( FVector Point, UBoxComponent* Box )
 {
@@ -89,3 +95,4 @@ AUnrealPortalManager* UTool::GetPortalManager( AActor* Context )
 
     return Manager;
 }
+

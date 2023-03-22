@@ -4,6 +4,9 @@
 #include "UObject/NoExportTypes.h"
 #include "MathLibrary.generated.h"
 
+struct FHitResult;
+struct FCollisionQueryParams;
+
 UCLASS()
 class UNREALPORTAL_API UTool : public UObject
 {
@@ -20,4 +23,6 @@ class UNREALPORTAL_API UTool : public UObject
 
     UFUNCTION(BlueprintPure,Category="Portal|Tools")
     static AUnrealPortalManager* GetPortalManager( AActor* Context );
+
+    static bool IsVertexHidden(FHitResult& OUT_hit_result, USceneComponent* camera, const FVector& vertex, FCollisionQueryParams& params);
 }

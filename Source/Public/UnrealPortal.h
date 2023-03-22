@@ -4,6 +4,27 @@
 
 class AUnrealPortalCharacter;
 
+USTRUCT(BlueprintType)
+struct FTextureToRender {
+   GENERATED_BODY()
+
+public:
+   FTextureToRender() : texture(nullptr), is_mirror(false), weight(0.f) {};
+   FTextureToRender(FTextureToRender&& other) noexcept;
+   FTextureToRender(const FTextureToRender& other) noexcept;
+   FTextureToRender& operator=(FTextureToRender&& other) noexcept;
+   FTextureToRender& operator=(const FTextureToRender& other) noexcept;
+
+   UPROPERTY(BlueprintReadOnly)
+   const UTexture* texture;
+
+   UPROPERTY(BlueprintReadOnly)
+   bool is_mirror;
+
+   UPROPERTY(BlueprintReadOnly)
+   float weight;
+};
+
 UCLASS()
 class UNREALPORTALS_API AUnrealPortal : public AActor
 {
@@ -11,7 +32,11 @@ class UNREALPORTALS_API AUnrealPortal : public AActor
 
     public:
 
+        FPlane GetPortalPlane() const { return FPlane(GetActorLocation(), GetActorForwardVector()); }
+
         virtual void Tick(float DeltaTime) override;
+
+        
 
         UFUNCTION(BlueprintPure, Category="Portal")
         bool IsActive();
@@ -46,11 +71,21 @@ class UNREALPORTALS_API AUnrealPortal : public AActor
         UFUNCTION(BlueprintCallable, Category="Portal")
         void TeleportActor( AActor* ActorToTeleport );
 
+        void LoadMeshVertices() const;
+
+        const TArray<FVector>* GetMeshVertices() const;
+
+        FVector GetMiddlePoint() const { return m_middle_point; }
+
     protected:
         UPROPERTY(BlueprintReadOnly)
         USceneComponent* PortalRootComponent;
 
         virtual void BeginPlay() override;
+
+        mutable TArray<FVector> m_vertices;
+
+        mutable FVector m_middle_point;
 
     private:
         bool bIsActive;
@@ -75,6 +110,6 @@ class UNREALPORTALS_API AUnrealPortal : public AActor
 	    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Capture)
 	    UMaterial* Material;
 
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Portal)
+        UPROPERTY(Instanced, VisibleInstanceOnly, BlueprintReadWrite, Category = Portal, meta = (ExposeOnSpawn="true"))
         AActor* PortalTarget;
 };

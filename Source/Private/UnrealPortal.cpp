@@ -11,6 +11,8 @@
 #include "UnrealPortalManager.h"
 #include "UnrealPortalPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include <Runtime/Engine/Public/EngineUtils.h>
+#include <utility>
 
 
 
@@ -30,7 +32,7 @@ AUnrealPortal::AUnrealPortal(const FObjectInitializer& ObjectInitializer)
     PortalRootComponent->Mobility = EComponentMobility::Movable;
 
     PortalMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PortalMesh"));
-    PortalMesh->SetupAttatchment(PortalRootComponent);
+    PortalMesh->AttachToComponent(PortalRootComponent, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
 
     PortalArea = CreateDefaultSubobject<UBoxComponent>(TEXT("Portal_Area"));
     PortalArea->SetupAttatchment(PortalRootComponent);
@@ -76,6 +78,8 @@ void AUnrealPortal::ForceTick()
 void AUnrealPortal::BeginPlay()
 {
     Super::BeginPlay();
+
+    LoadMeshVertices();
 
     SetTarget(PortalTarget);
     MaterialInstance = UMaterialInstanceDynamic::Create(Material, this);
@@ -219,13 +223,55 @@ void AUnrealPortal::Tick(float DeltaTime)
     {
         AUnrealPortalCharacter* Character = Cast<AUnrealPortalCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0);
         UCameraComponent* PlayerCamera = Character->GetPlayerCamera();
+        FVector Point = PlayerCamera->GetComponentLocation();
         FVector PortalLocation = PortalRootComponent->GetComponentLocation();
         FVector PortalNormal = PortalRootComponent->GetForwardVector() * -1;
         bool isCrossing = IsPointCrossingPortal(PlayerCamera,PortalLocation,PortalNormal);
-
-        if(isCrossing != false)
+        bool inBox = UTool:IsPointInsideBox(Point, PortalArea);
+        bool inFront = IsPointInFrontOfPortal(Point,PortalLocation,PortalNormal);
+        AUnrealPortalManager* PortalManager = UTool::GetPoralManager(Character);
+        if(isBox != false)
         {
-            
+            MaterialInstance->SetScalarParameterValue(FName("ScaleVertex"),1.0);
+        }
+        if(inBox && isCrossing && inFront)
+        {
+            PortalManager->RequestTeleportByPortal(this,Character);
         }
     }
+}
+
+void AUnrealPortal::LoadMeshVerticies() const
+{
+   m_verticies.Empty(4);
+
+   m_middle_point = FVector::ZeroVector;
+
+   if (!IsValidLowLevel()) return;
+   if (!PortalMesh) return;
+   if (!PortalMesh->GetStaticMesh()) return;
+   if (!PortalMesh->GetStaticMesh()->GetRenderData()) return;
+
+
+   FStaticMeshLODResources& LOD_model = m_portal_mesh->GetStaticMesh()->GetRenderData()->LODResources[0];
+   int32 nb_vertices = LOD_model.VertexBuffers.StaticMeshVertexBuffer.GetNumVertices();
+
+   for (int32 vertex_index = 0; vertex_index < nb_vertices; ++vertex_index)
+   {
+      const FVector3f& local_position = LOD_model.VertexBuffers.PositionVertexBuffer.VertexPosition(vertex_index);
+      const FVector world_position = PortalMesh->GetComponentTransform().TransformPosition(UE::Math::TVector<double>(local_position));
+      m_vertices.Add(world_position);
+
+      m_middle_point += world_position;
+   }
+
+   m_middle_point /= nb_vertices;
+}
+
+const TArray<FVector>* AUnrealPortal::GetMeshVerticies() const
+{
+   if (m_vertices.Num() == 0)
+      LoadMeshVertices();
+
+   return &m_vertices;
 }
